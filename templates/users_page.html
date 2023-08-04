@@ -1,0 +1,38 @@
+{% extends 'base.html' %}
+{% block content %}
+    <script>
+         window.onload = () => {
+             let div = document.getElementById('content');
+
+             var Request = new XMLHttpRequest();
+
+            Request.onreadystatechange = function() {
+                if (Request.readyState == 4) {
+                    var response = JSON.parse(Request.responseText);
+                    let ol = document.createElement('ol');
+
+                    for (var user of response) {
+                        var li = document.createElement('li');
+
+                        var name = document.createElement('a');
+                        name.innerHTML = user.name;
+                        name.href = '{% url 'user_posts_url' user.id %}';
+                        li.appendChild(name);
+
+                        var email = document.createElement('p');
+                        email.innerHTML = user.email;
+                        li.appendChild(email);
+
+                        ol.appendChild(li);
+                    }
+
+                    div.appendChild(ol);
+                }
+            }
+
+            var url = "{% url 'users_api' %}";
+            Request.open('get', url, true);
+            Request.send(null);
+         }
+    </script>
+{% endblock content %}

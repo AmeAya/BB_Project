@@ -1,0 +1,59 @@
+{% extends 'base.html' %}
+{% block content %}
+<script>
+    window.onload = () => {
+             let div = document.getElementById('content');
+             let user_id = window.location.href.split('/').pop();
+             var Request = new XMLHttpRequest();
+
+            Request.onreadystatechange = function() {
+                if (Request.readyState == 4) {
+                    var response = JSON.parse(Request.responseText);
+                    let ul = document.createElement('ul');
+
+                    for (var post of response) {
+                        var li = document.createElement('li');
+
+                        var title = document.createElement('h3');
+                        title.innerHTML = post.title;
+                        li.appendChild(title);
+
+                        var body = document.createElement('p');
+                        body.innerHTML = post.body;
+                        li.appendChild(body);
+
+                        var delete_button = document.createElement('button');
+                        delete_button.innerHTML = 'Delete Post';
+                        delete_button.onclick = function() {
+                            var delete_request = new XMLHttpRequest();
+
+                            delete_request.onreadystatechange = function() {
+                                if (delete_request.readyState == 4) {
+                                    if (delete_request.status == 403) {
+                                        alert("This is not your post!");
+                                    }
+                                    if (delete_request.status == 200) {
+                                        document.location.reload();
+                                    }
+                                }
+                            }
+
+                            delete_request.open('post', "../delete_post_api/" + post.id, true);
+                            delete_request.setRequestHeader('X-CSRFToken', '{{ csrf_token }}');
+                            delete_request.send(null);
+                        };
+                        li.appendChild(delete_button);
+
+                        ul.appendChild(li);
+                    }
+
+                    div.appendChild(ul);
+                }
+            }
+
+            var url = "{% url 'user_posts_api' user_id %}";
+            Request.open('get', url, true);
+            Request.send(null);
+         }
+</script>
+{% endblock content %}
